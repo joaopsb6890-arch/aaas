@@ -99,7 +99,8 @@ This *feature list* is not completed but I will update and migrate all descripti
 | Reload | R |
 | Previous / Next Weapon | Mouse Wheel Up / Down |
 | Interact / Use | F |
-| Exit / Menu | Esc |
+| Camera views (on foot / driving) | V |
+| Pause menu | Esc |
 | Vehicle Brake | Space *(when driving)* |
 
 Remap everything under **Project → Project Settings → Input Map**.

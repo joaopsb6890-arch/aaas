@@ -1,0 +1,149 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://ui/main_menu.gd" id="1_menu"]
+[ext_resource type="Shader" path="res://ui/shaders/menu_background.gdshader" id="2_bg"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_bg"]
+shader = ExtResource("2_bg")
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_menu")
+
+[node name="Background" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_bg")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.043, 0.055, 0.078, 1)
+
+[node name="Content" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 96
+theme_override_constants/margin_top = 72
+theme_override_constants/margin_right = 96
+theme_override_constants/margin_bottom = 64
+
+[node name="Row" type="HBoxContainer" parent="Content"]
+layout_mode = 2
+theme_override_constants/separation = 64
+
+[node name="Left" type="VBoxContainer" parent="Content/Row"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="Kicker" type="Label" parent="Content/Row/Left"]
+layout_mode = 2
+text = "// TREINAMENTO TATICO"
+
+[node name="Title" type="Label" parent="Content/Row/Left"]
+layout_mode = 2
+text = "FPS DEMO"
+
+[node name="Divider" type="ColorRect" parent="Content/Row/Left"]
+custom_minimum_size = Vector2(140, 3)
+layout_mode = 2
+size_flags_horizontal = 0
+color = Color(1, 0.623, 0.11, 1)
+
+[node name="Subtitle" type="Label" parent="Content/Row/Left"]
+layout_mode = 2
+text = "SOBREVIVA. ADAPTE-SE. AVANCE."
+
+[node name="ButtonsSpacer" type="Control" parent="Content/Row/Left"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+
+[node name="Buttons" type="VBoxContainer" parent="Content/Row/Left"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="PlayButton" type="Button" parent="Content/Row/Left/Buttons"]
+custom_minimum_size = Vector2(0, 54)
+layout_mode = 2
+focus_neighbor_bottom = NodePath("../QuitButton")
+text = "JOGAR"
+
+[node name="QuitButton" type="Button" parent="Content/Row/Left/Buttons"]
+custom_minimum_size = Vector2(0, 54)
+layout_mode = 2
+focus_neighbor_top = NodePath("../PlayButton")
+text = "SAIR"
+
+[node name="FooterSpacer" type="Control" parent="Content/Row/Left"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Version" type="Label" parent="Content/Row/Left"]
+layout_mode = 2
+text = "v0.2  -  GODOT 4"
+
+[node name="Right" type="VBoxContainer" parent="Content/Row"]
+custom_minimum_size = Vector2(340, 0)
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 8
+theme_override_constants/separation = 10
+alignment = 2
+
+[node name="ControlsTitle" type="Label" parent="Content/Row/Right"]
+layout_mode = 2
+text = "CONTROLES"
+
+[node name="ControlsPanel" type="PanelContainer" parent="Content/Row/Right"]
+layout_mode = 2
+
+[node name="ControlsMargin" type="MarginContainer" parent="Content/Row/Right/ControlsPanel"]
+layout_mode = 2
+
+[node name="ControlsList" type="VBoxContainer" parent="Content/Row/Right/ControlsPanel/ControlsMargin"]
+layout_mode = 2
+theme_override_constants/separation = 7
+
+[node name="Item1" type="Label" parent="Content/Row/Right/ControlsPanel/ControlsMargin/ControlsList"]
+layout_mode = 2
+text = "W A S D   MOVER"
+
+[node name="Item2" type="Label" parent="Content/Row/Right/ControlsPanel/ControlsMargin/ControlsList"]
+layout_mode = 2
+text = "MOUSE   OLHAR"
+
+[node name="Item3" type="Label" parent="Content/Row/Right/ControlsPanel/ControlsMargin/ControlsList"]
+layout_mode = 2
+text = "BOTAO ESQUERDO / DIREITO   ATIRAR / MIRAR"
+
+[node name="Item4" type="Label" parent="Content/Row/Right/ControlsPanel/ControlsMargin/ControlsList"]
+layout_mode = 2
+text = "SHIFT / ESPACO   CORRER / PULAR"
+
+[node name="Item5" type="Label" parent="Content/Row/Right/ControlsPanel/ControlsMargin/ControlsList"]
+layout_mode = 2
+text = "F   ENTRAR / SAIR DO VEICULO"
+
+[node name="Item6" type="Label" parent="Content/Row/Right/ControlsPanel/ControlsMargin/ControlsList"]
+layout_mode = 2
+text = "V   TROCAR DE CAMERA (4 VISTAS)"
+
+[node name="Item7" type="Label" parent="Content/Row/Right/ControlsPanel/ControlsMargin/ControlsList"]
+layout_mode = 2
+text = "ESC   PAUSAR"
+
+[node name="Hint" type="Label" parent="Content/Row/Right"]
+layout_mode = 2
+text = "Ao volante: V alterna entre as 4 cameras do GTA."
+horizontal_alignment = 2
+autowrap_mode = 3

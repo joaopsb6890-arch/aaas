@@ -1,0 +1,93 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://ui/pause_menu.gd" id="1_pause"]
+
+[node name="PauseMenu" type="CanvasLayer"]
+process_mode = 3
+layer = 90
+script = ExtResource("1_pause")
+
+[node name="Root" type="Control" parent="."]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+
+[node name="Dim" type="ColorRect" parent="Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.008, 0.012, 0.02, 0.72)
+
+[node name="Center" type="CenterContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="Root/Center"]
+custom_minimum_size = Vector2(430, 0)
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="Root/Center/Panel"]
+layout_mode = 2
+
+[node name="Box" type="VBoxContainer" parent="Root/Center/Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Kicker" type="Label" parent="Root/Center/Panel/Margin/Box"]
+layout_mode = 2
+text = "// SISTEMA"
+
+[node name="Title" type="Label" parent="Root/Center/Panel/Margin/Box"]
+layout_mode = 2
+text = "PAUSADO"
+
+[node name="Rule" type="ColorRect" parent="Root/Center/Panel/Margin/Box"]
+custom_minimum_size = Vector2(56, 3)
+layout_mode = 2
+size_flags_horizontal = 0
+color = Color(1, 0.623, 0.11, 1)
+
+[node name="Spacer" type="Control" parent="Root/Center/Panel/Margin/Box"]
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 2
+
+[node name="Resume" type="Button" parent="Root/Center/Panel/Margin/Box"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+text = "CONTINUAR"
+
+[node name="Restart" type="Button" parent="Root/Center/Panel/Margin/Box"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+text = "REINICIAR FASE"
+
+[node name="MenuButton" type="Button" parent="Root/Center/Panel/Margin/Box"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+text = "MENU PRINCIPAL"
+
+[node name="Quit" type="Button" parent="Root/Center/Panel/Margin/Box"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+text = "SAIR DO JOGO"
+
+[node name="Spacer2" type="Control" parent="Root/Center/Panel/Margin/Box"]
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 2
+
+[node name="Hint" type="Label" parent="Root/Center/Panel/Margin/Box"]
+layout_mode = 2
+text = "ESC para continuar"
+horizontal_alignment = 1

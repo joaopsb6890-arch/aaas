@@ -358,7 +358,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0.4, 1.4)
 use_as_traction = true
 use_as_steering = true
 wheel_radius = 0.4
-suspension_stiffness = 50.0
+wheel_friction_slip = 13.5
+suspension_stiffness = 33.0
+suspension_travel = 0.22
+damping_compression = 0.55
+damping_relaxation = 0.9
 
 [node name="jeepwheel-FL" type="MeshInstance3D" parent="VehicleWheelFL" unique_id=166183951]
 transform = Transform3D(1.322873, 0, 0, 0, 0.94852316, 0, 0, 0, 0.94852316, 0, 0, 0)
@@ -370,7 +374,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0.4, 1.4)
 use_as_traction = true
 use_as_steering = true
 wheel_radius = 0.4
-suspension_stiffness = 50.0
+wheel_friction_slip = 13.5
+suspension_stiffness = 33.0
+suspension_travel = 0.22
+damping_compression = 0.55
+damping_relaxation = 0.9
 
 [node name="jeepwheel-FR" type="MeshInstance3D" parent="VehicleWheelFR" unique_id=772611968]
 transform = Transform3D(1.322873, 0, 0, 0, 0.94852316, 0, 0, 0, 0.94852316, 0, 0, 0)
@@ -381,7 +389,11 @@ skeleton = NodePath("")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0.4, -1.2000002)
 use_as_traction = true
 wheel_radius = 0.4
-suspension_stiffness = 50.0
+wheel_friction_slip = 13.5
+suspension_stiffness = 33.0
+suspension_travel = 0.22
+damping_compression = 0.55
+damping_relaxation = 0.9
 
 [node name="jeepwheel-RL" type="MeshInstance3D" parent="VehicleWheelRL" unique_id=2062273759]
 transform = Transform3D(1.322873, 0, 0, 0, 0.94852316, 0, 0, 0, 0.94852316, 0, 0, 0)
@@ -392,7 +404,11 @@ skeleton = NodePath("")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0.4, -1.2000002)
 use_as_traction = true
 wheel_radius = 0.4
-suspension_stiffness = 50.0
+wheel_friction_slip = 13.5
+suspension_stiffness = 33.0
+suspension_travel = 0.22
+damping_compression = 0.55
+damping_relaxation = 0.9
 
 [node name="jeepwheel-RR" type="MeshInstance3D" parent="VehicleWheelRR" unique_id=105903956]
 transform = Transform3D(1.322873, 0, 0, 0, 0.94852316, 0, 0, 0, 0.94852316, 0, 0, 0)
@@ -428,6 +444,8 @@ shape = SubResource("SphereShape3D_k32ov")
 [node name="Camera3D" type="Camera3D" parent="." unique_id=1301829179]
 transform = Transform3D(-0.9958843, 0.0093163615, 0.09015258, 0, 0.9947027, -0.10279253, -0.09063267, -0.102369465, -0.99060905, 0.3, 1.6695405, 0.22360176)
 cull_mask = 1048571
+near = 0.05
+fov = 70.0
 
 [node name="PlayerExit" type="Marker3D" parent="." unique_id=1254847671]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.6128204, 0.19069028, 0.4136446)
