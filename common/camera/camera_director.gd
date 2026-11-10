@@ -6,6 +6,7 @@ extends Node
 ## collision-aware Camera3D. Press V to cycle through 4 views.
 
 const ViewToast := preload("res://common/camera/view_toast.gd")
+const PlayerBody := preload("res://common/player/player_body.gd")
 
 const VIEWS := [
 	{"title": "1ª PESSOA", "dist": 0.0, "height": 0.0, "side": 0.0, "fov": 75.0, "smooth": 0.0},
@@ -23,6 +24,7 @@ var _player_camera: Camera3D
 var _pivot: Node3D
 var _holder: Node3D
 var _camera: Camera3D
+var _body: Node3D
 var _toast: CanvasLayer
 
 var _view: int = 0
@@ -81,6 +83,7 @@ func _resolve() -> bool:
 	_pivot = null
 	_holder = null
 	_camera = null
+	_body = null
 	_cam_ready = false
 
 	var candidate: Node = Global.player
@@ -156,10 +159,10 @@ func _apply_view(delta: float) -> void:
 			_camera.current = false
 		if not _player_camera.current:
 			_player_camera.make_current()
-		_set_visuals_visible(true)
+		_set_view_visuals(true)
 		return
 
-	_set_visuals_visible(false)
+	_set_view_visuals(false)
 
 	var pivot: Node3D = _pivot if is_instance_valid(_pivot) else _player
 	if not is_instance_valid(pivot):
@@ -210,13 +213,29 @@ func _resolve_collision(from: Vector3, to: Vector3) -> Vector3:
 	return from + direction * maxf(distance, 0.35)
 
 
-func _set_visuals_visible(visible_state: bool) -> void:
+## Primeira pessoa: armas na tela e corpo escondido.
+## Terceira pessoa: corpo visível e armas da tela escondidas.
+func _set_view_visuals(first_person: bool) -> void:
 	if not is_instance_valid(_player):
 		return
-	_player.visible = visible_state
+	_player.visible = true
 	var arms_viewport := _player.get_node_or_null("WeaponSubViewport")
 	if arms_viewport is CanvasItem:
-		(arms_viewport as CanvasItem).visible = visible_state
+		(arms_viewport as CanvasItem).visible = first_person
+	_ensure_body()
+	if is_instance_valid(_body):
+		_body.visible = not first_person
+
+
+func _ensure_body() -> void:
+	if is_instance_valid(_body):
+		return
+	if not is_instance_valid(_player) or not is_instance_valid(_pivot):
+		return
+	_body = PlayerBody.new()
+	_body.name = "PlayerBody"
+	_pivot.add_child(_body)
+	_body.setup(_pivot, _player)
 
 
 func _show_toast() -> void:

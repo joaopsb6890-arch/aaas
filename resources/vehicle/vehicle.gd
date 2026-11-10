@@ -27,19 +27,20 @@ var is_driving: bool = false
 ## Força aerodinâmica que empurra o carro para o chão em alta velocidade.
 @export var downforce: float = 3000.0
 ## Corrige a inclinação lateral (roll) nas curvas.
-@export var anti_roll_force: float = 1200.0
+@export var anti_roll_force: float = 9000.0
 ## Reduz o deslizamento lateral, deixando o carro mais "plantado".
 @export var lateral_grip: float = 1.6
 
 @export_group("Steering")
-@export var steering_limit: float = 0.4
-@export var steering_speed: float = 3.0
+@export var steering_limit: float = 0.36
+@export var steering_speed: float = 3.6
 ## Fração do curso de direção disponível na velocidade máxima.
-@export var high_speed_steering: float = 0.35
+@export var high_speed_steering: float = 0.28
 @export var steering_return_speed: float = 4.0
 
 @export_group("Camera")
-@export var camera_sensitivity: float = 0.003
+## Mesma sensibilidade da câmera a pé (player.gd usa 0.01).
+@export var camera_sensitivity: float = 0.01
 @export var camera_pitch_min: float = -40.0
 @export var camera_pitch_max: float = 60.0
 ## Tempo sem mexer no mouse até a câmera voltar sozinha para trás do carro.
@@ -67,7 +68,7 @@ const CAMERA_VIEWS := [
 		"offset": Vector3(0.0, 2.6, 7.2),
 		"pitch_factor": 0.55,
 		"fov": 68.0,
-		"smooth": 5.0,
+		"smooth": 10.0,
 		"fixed": false,
 	},
 	{
@@ -75,7 +76,7 @@ const CAMERA_VIEWS := [
 		"offset": Vector3(0.9, 2.0, 4.2),
 		"pitch_factor": 0.7,
 		"fov": 72.0,
-		"smooth": 9.0,
+		"smooth": 14.0,
 		"fixed": false,
 	},
 	{
@@ -121,6 +122,9 @@ var _saved_mask: int = 1
 
 
 func _ready() -> void:
+	# Centro de massa baixo: o carro inclina menos e não capota em curva.
+	center_of_mass_mode = RigidBody3D.CENTER_OF_MASS_MODE_CUSTOM
+	center_of_mass = Vector3(0.0, -0.3, 0.0)
 	if camera != null:
 		camera.current = false
 	_uses_look_signal = Global.has_signal("look_input")
@@ -246,7 +250,9 @@ func _apply_driving(delta: float) -> void:
 		apply_central_force(-global_transform.basis.y * downforce * speed_ratio * speed_ratio)
 	if anti_roll_force > 0.0:
 		var roll := asin(clampf(global_transform.basis.x.dot(Vector3.UP), -1.0, 1.0))
-		apply_torque(global_transform.basis.z * roll * anti_roll_force)
+		# O torque precisa se OPOR à inclinação. Com o sinal positivo ele somava
+		# com o roll e virava o carro de ponta-cabeça nas curvas fortes.
+		apply_torque(global_transform.basis.z * -roll * anti_roll_force)
 	if lateral_grip > 0.0:
 		var lateral_speed := global_transform.basis.x.dot(linear_velocity)
 		apply_central_force(-global_transform.basis.x * lateral_speed * lateral_grip * mass * 0.05)
