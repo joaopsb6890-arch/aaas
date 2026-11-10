@@ -42,8 +42,9 @@ var is_driving: bool = false
 @export var camera_sensitivity: float = 0.003
 @export var camera_pitch_min: float = -40.0
 @export var camera_pitch_max: float = 60.0
-## Velocidade com que o olhar livre volta para trás do carro.
-@export var camera_recenter_speed: float = 1.6
+## Tempo sem mexer no mouse até a câmera voltar sozinha para trás do carro.
+@export var camera_recenter_delay: float = 1.4
+@export var camera_recenter_speed: float = 1.1
 @export var camera_auto_fov: bool = true
 @export var camera_fov_boost: float = 9.0
 
@@ -95,19 +96,28 @@ const CAMERA_VIEWS := [
 	},
 ]
 
+## Tempo (ms) que uma entrada de "look_input" continua sendo considerada ativa.
+const LOOK_SIGNAL_MEMORY_MS := 800
+const SEAT_OFFSET := Vector3(0.0, 1.0, 0.35)
+
 @onready var camera: Camera3D = $Camera3D
 @onready var player_exit: Marker3D = $PlayerExit
 
 var _steering_input: float = 0.0
 var _cam_yaw_offset: float = 0.0
 var _cam_pitch_offset: float = 0.0
-var _cam_position: Vector3 = Vector3.ZERO
-var _cam_ready: bool = false
+var _look_idle: float = 0.0
+var _last_look_signal_msec: int = -1000000
+var _view_yaw: float = 0.0
+var _view_pitch: float = 0.0
 var _camera_view: int = 0
 var _toast: CanvasLayer = null
 var _exit_cooldown: float = 0.0
 var _uses_look_signal: bool = false
 var _forward_speed: float = 0.0
+var _player_ref: Node3D = null
+var _saved_layer: int = 1
+var _saved_mask: int = 1
 
 
 func _ready() -> void:
@@ -132,6 +142,7 @@ func _physics_process(delta: float) -> void:
 		return
 
 	_apply_driving(delta)
+	_follow_seat()
 
 
 func _process(delta: float) -> void:
@@ -149,25 +160,47 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 
+# ------------------------------------------------------------- olhar livre ---
+
 func _on_look_input(delta: Vector2) -> void:
 	if not is_driving:
 		return
-	_cam_yaw_offset -= delta.x
-	_cam_pitch_offset -= delta.y
-	_clamp_pitch()
+	_last_look_signal_msec = Time.get_ticks_msec()
+	# Aceita tanto deltas já em radianos quanto deltas em pixels.
+	var dx := delta.x
+	var dy := delta.y
+	if absf(dx) > 1.0:
+		dx *= camera_sensitivity
+	if absf(dy) > 1.0:
+		dy *= camera_sensitivity
+	_apply_look(-dx, -dy)
 
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not is_driving:
 		return
 	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
-		_cam_yaw_offset -= event.relative.x * camera_sensitivity
-		_cam_pitch_offset -= event.relative.y * camera_sensitivity
-		_clamp_pitch()
+		# Se o projeto já envia olhar por Global.look_input, não aplica duas vezes.
+		if _look_signal_active():
+			return
+		_apply_look(
+			-event.relative.x * camera_sensitivity,
+			-event.relative.y * camera_sensitivity
+		)
 
 
-func _clamp_pitch() -> void:
-	_cam_pitch_offset = clampf(_cam_pitch_offset, deg_to_rad(camera_pitch_min), deg_to_rad(camera_pitch_max))
+func _look_signal_active() -> bool:
+	return Time.get_ticks_msec() - _last_look_signal_msec < LOOK_SIGNAL_MEMORY_MS
+
+
+func _apply_look(yaw_delta: float, pitch_delta: float) -> void:
+	_cam_yaw_offset = wrapf(_cam_yaw_offset + yaw_delta, -PI, PI)
+	_cam_pitch_offset = clampf(
+		_cam_pitch_offset + pitch_delta,
+		deg_to_rad(camera_pitch_min),
+		deg_to_rad(camera_pitch_max)
+	)
+	_look_idle = 0.0
 
 
 # ---------------------------------------------------------------- condução ----
@@ -219,12 +252,20 @@ func _apply_driving(delta: float) -> void:
 		apply_central_force(-global_transform.basis.x * lateral_speed * lateral_grip * mass * 0.05)
 
 
+## Mantém o corpo do jogador junto ao carro enquanto dirige.
+## Isso evita que o inimigo persiga/cause dano na posição antiga (fora do carro)
+## e que o personagem invisível fique como obstáculo no mundo.
+func _follow_seat() -> void:
+	if not is_instance_valid(_player_ref):
+		return
+	_player_ref.global_position = global_transform * SEAT_OFFSET
+
+
 # ------------------------------------------------------------------ câmera ----
 
 func _cycle_camera() -> void:
 	_camera_view = (_camera_view + 1) % CAMERA_VIEWS.size()
-	_cam_ready = false
-	_cam_yaw_offset = 0.0
+	_look_idle = camera_recenter_delay
 	if _toast == null:
 		_toast = ViewToast.new()
 		add_child(_toast)
@@ -239,33 +280,37 @@ func _update_camera(delta: float) -> void:
 	if camera == null:
 		return
 
+	_look_idle += delta
 	var view: Dictionary = CAMERA_VIEWS[_camera_view]
 	var offset: Vector3 = view["offset"]
 
 	if bool(view["fixed"]):
 		# Presa ao carro (capô / primeira pessoa).
-		var local_rotation := Basis.from_euler(Vector3(_cam_pitch_offset, _cam_yaw_offset, 0.0))
+		_view_yaw = global_rotation.y + _cam_yaw_offset
+		_view_pitch = _cam_pitch_offset
+		var local_rotation := Basis.from_euler(Vector3(_view_pitch, _cam_yaw_offset, 0.0))
 		camera.global_transform = Transform3D(global_transform.basis * local_rotation, global_transform * offset)
-		_cam_ready = false
 	else:
-		# Perseguição orbitando o carro, com colisão.
-		var orbit := Basis.from_euler(Vector3(
-			_cam_pitch_offset * float(view["pitch_factor"]) * 0.55,
-			global_rotation.y + _cam_yaw_offset,
-			0.0
-		))
-		var anchor := global_transform * Vector3(0.0, 1.15, 0.0)
-		var desired := anchor + orbit * Vector3(offset.x, offset.y * 0.3, offset.z)
-		desired = _resolve_camera_collision(anchor, desired)
+		# Perseguição: uma única fonte de verdade (yaw/pitch suavizados) para
+		# rotação e posição, sem "nadar" enquanto o carro anda.
 		var smooth: float = view["smooth"]
-		if not _cam_ready:
-			_cam_position = desired
-			_cam_ready = true
-		else:
-			_cam_position = _cam_position.lerp(desired, 1.0 - exp(-smooth * delta))
-		camera.global_transform = Transform3D(orbit, _cam_position)
-		# Olhar livre volta suavemente para trás do carro.
-		_cam_yaw_offset = lerp_angle(_cam_yaw_offset, 0.0, 1.0 - exp(-camera_recenter_speed * delta))
+		var blend := 1.0 - exp(-smooth * delta)
+		_view_yaw = lerp_angle(_view_yaw, global_rotation.y + _cam_yaw_offset, blend)
+		_view_pitch = lerpf(_view_pitch, _cam_pitch_offset * float(view["pitch_factor"]), blend)
+
+		var basis := Basis.from_euler(Vector3(_view_pitch * 0.55, _view_yaw, 0.0))
+		var anchor := global_transform * Vector3(0.0, 1.15, 0.0)
+		var desired := anchor + basis * Vector3(offset.x, offset.y * 0.3, offset.z)
+		desired = _resolve_camera_collision(anchor, desired)
+		camera.global_transform = Transform3D(basis, desired)
+
+		# Olhar livre volta para trás do carro só depois de um tempo parado.
+		if _look_idle > camera_recenter_delay:
+			_cam_yaw_offset = lerp_angle(
+				_cam_yaw_offset,
+				0.0,
+				1.0 - exp(-camera_recenter_speed * delta)
+			)
 
 	var target_fov: float = view["fov"]
 	if camera_auto_fov:
@@ -297,6 +342,13 @@ func _resolve_camera_collision(from: Vector3, to: Vector3) -> Vector3:
 
 # --------------------------------------------------------------- entrar/sair ---
 
+func _get_player() -> CharacterBody3D:
+	var candidate: Node = Global.player
+	if is_instance_valid(candidate) and candidate is CharacterBody3D:
+		return candidate as CharacterBody3D
+	return null
+
+
 func _on_activate_pressed() -> void:
 	if is_driving:
 		if _exit_cooldown <= 0.0:
@@ -306,22 +358,32 @@ func _on_activate_pressed() -> void:
 
 
 func _enter_vehicle() -> void:
-	var player := Global.player
-	if not player:
+	var player := _get_player()
+	if player == null:
 		return
 
 	is_driving = true
 	Global.in_vehicle = true
+	_player_ref = player
 
 	# Entra já em 3ª pessoa, alinhado com o carro.
 	_camera_view = 0
 	_cam_yaw_offset = 0.0
 	_cam_pitch_offset = 0.0
-	_cam_ready = false
+	_look_idle = camera_recenter_delay
+	_view_yaw = global_rotation.y
+	_view_pitch = 0.0
+	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 
+	# O jogador vira o "assento": sem colisão (não empurra o carro) e invisível.
+	_saved_layer = player.collision_layer
+	_saved_mask = player.collision_mask
+	player.collision_layer = 0
+	player.collision_mask = 0
 	player.set_physics_process(false)
 	player.set_process_unhandled_input(false)
 	player.visible = false
+	player.global_position = global_transform * SEAT_OFFSET
 
 	camera.make_current()
 
@@ -329,7 +391,6 @@ func _enter_vehicle() -> void:
 	brake = 0.0
 	_steering_input = 0.0
 	steering = 0.0
-	_cam_position = camera.global_position
 
 	if engine_audio:
 		engine_audio.pitch_scale = engine_min_pitch
@@ -344,8 +405,11 @@ func _enter_vehicle() -> void:
 
 
 func _exit_vehicle() -> void:
-	var player := Global.player
-	if not player:
+	var player := _get_player()
+	if player == null:
+		is_driving = false
+		Global.in_vehicle = false
+		_player_ref = null
 		return
 
 	is_driving = false
@@ -354,10 +418,12 @@ func _exit_vehicle() -> void:
 
 	player.global_position = player_exit.global_position
 	player.velocity = Vector3.ZERO
-
+	player.collision_layer = _saved_layer
+	player.collision_mask = _saved_mask
 	player.visible = true
 	player.set_physics_process(true)
 	player.set_process_unhandled_input(true)
+	_player_ref = null
 
 	if player.camera:
 		player.camera.make_current()
@@ -367,7 +433,6 @@ func _exit_vehicle() -> void:
 	_steering_input = 0.0
 	steering = 0.0
 	_camera_view = 0
-	_cam_ready = false
 
 	if engine_audio:
 		engine_audio.stop()
@@ -421,6 +486,16 @@ func _on_door_area_3d_body_exited(body: Node3D) -> void:
 
 
 func _on_bumper_body_entered(body: Node3D) -> void:
-	if Global.in_vehicle and body and body.has_method("get_damage"):
+	if not Global.in_vehicle:
+		return
+	if body == null or not is_instance_valid(body):
+		return
+	# O próprio motorista e qualquer parte do jogador não levam dano do carro.
+	if body == _player_ref or body.is_in_group("player"):
+		return
+	# Só machuca em batidas de verdade (evita dano parado/encostando).
+	if linear_velocity.length() < 3.0:
+		return
+	if body.has_method("get_damage"):
 		var direction = global_position.direction_to(body.global_position)
 		body.get_damage(damage, direction)

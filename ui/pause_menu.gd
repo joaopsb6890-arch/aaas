@@ -62,6 +62,9 @@ func close() -> void:
 	var tw := create_tween()
 	tw.tween_property(_root, "modulate:a", 0.0, 0.12)
 	await tw.finished
+	# A cena pode ter sido trocada durante o fade.
+	if not is_instance_valid(_root):
+		return
 	if not _open:
 		_root.visible = false
 		_root.modulate.a = 1.0
@@ -97,7 +100,7 @@ func _animate_open() -> void:
 
 func _is_main_menu() -> bool:
 	var scene := get_tree().current_scene
-	if scene == null:
+	if scene == null or not is_instance_valid(scene):
 		return false
 	return scene.scene_file_path == MAIN_MENU_SCENE
 

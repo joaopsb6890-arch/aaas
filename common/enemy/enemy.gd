@@ -263,23 +263,27 @@ func _decide(delta: float) -> void:
 		return
 
 	_has_last_known = false
-	_set_state(State.PATROL)
 	if _has_move_target and global_position.distance_to(_move_target) > ARRIVE_DISTANCE:
+		_set_state(State.PATROL)
 		return
 	if _patrol_wait_left > 0.0:
+		_set_state(State.IDLE)
 		return
 	_pick_patrol_point()
 	_patrol_wait_left = patrol_wait
+	_set_state(State.PATROL)
 
 
 func _decide_passive(delta: float) -> void:
-	_set_state(State.PATROL)
 	if _has_move_target and global_position.distance_to(_move_target) > ARRIVE_DISTANCE:
+		_set_state(State.PATROL)
 		return
 	if _patrol_wait_left > 0.0:
+		_set_state(State.IDLE)
 		return
 	_pick_patrol_point()
 	_patrol_wait_left = patrol_wait
+	_set_state(State.PATROL)
 
 
 func _chase_point() -> Vector3:
@@ -332,7 +336,7 @@ func _set_state(new_state: State) -> void:
 				play_sfx(alert_sfx)
 		State.SEARCH:
 			play_sfx(alert_sfx)
-		State.PATROL:
+		State.IDLE:
 			play_sfx(idle_sfx)
 
 	if debug_label and Global.debug_mode:
@@ -342,8 +346,8 @@ func _set_state(new_state: State) -> void:
 func _apply_conditions() -> void:
 	if animation_tree == null:
 		return
-	animation_tree.set("parameters/conditions/idle", state == State.IDLE or state == State.PATROL)
-	animation_tree.set("parameters/conditions/move", state == State.CHASE or state == State.SEARCH)
+	animation_tree.set("parameters/conditions/idle", state == State.IDLE)
+	animation_tree.set("parameters/conditions/move", state == State.PATROL or state == State.CHASE or state == State.SEARCH)
 	animation_tree.set("parameters/conditions/attack", state == State.ATTACK)
 	animation_tree.set("parameters/conditions/dead", state == State.DEAD)
 
@@ -497,6 +501,9 @@ func _on_chase_timer_timeout() -> void:
 
 func _deal_damage() -> void:
 	if not is_alive or not _player_is_alive():
+		return
+	if Global.in_vehicle:
+		# Dentro do carro o jogador está protegido.
 		return
 	if _attack_cooldown_left > 0.0:
 		return

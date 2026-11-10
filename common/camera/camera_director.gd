@@ -60,17 +60,39 @@ func _process(delta: float) -> void:
 
 
 func _resolve() -> bool:
-	if is_instance_valid(_player) and is_instance_valid(_player_camera):
-		return true
+	if is_instance_valid(_player):
+		if is_instance_valid(_player_camera) and is_instance_valid(_camera):
+			return true
+		# Jogador válido, mas as câmeras foram recriadas (troca de cena, etc.).
+		_player_camera = _find_player_camera()
+		if _player_camera == null:
+			return false
+		_pivot = _player.get_node_or_null("CameraPivot") as Node3D
+		if _pivot == null:
+			_pivot = _player
+		_holder = _player_camera.get_parent() as Node3D
+		_ensure_camera()
+		return is_instance_valid(_camera)
 
+	# Referências antigas (jogador removido / cena trocada):
+	# importate limpar antes de qualquer checagem de tipo.
 	_player = null
+	_player_camera = null
+	_pivot = null
+	_holder = null
+	_camera = null
+	_cam_ready = false
+
 	var candidate: Node = Global.player
-	if candidate is Node3D and is_instance_valid(candidate):
+	if is_instance_valid(candidate) and candidate is Node3D:
 		_player = candidate as Node3D
 	else:
-		_player = get_tree().get_first_node_in_group("player") as Node3D
+		var grouped: Node = get_tree().get_first_node_in_group("player")
+		if is_instance_valid(grouped) and grouped is Node3D:
+			_player = grouped as Node3D
 
-	if _player == null:
+	if _player == null or not _player.is_inside_tree():
+		_player = null
 		return false
 
 	_player_camera = _find_player_camera()
@@ -85,10 +107,12 @@ func _resolve() -> bool:
 	if _toast == null:
 		_toast = ViewToast.new()
 		add_child(_toast)
-	return _camera != null
+	return is_instance_valid(_camera)
 
 
 func _find_player_camera() -> Camera3D:
+	if not is_instance_valid(_player):
+		return null
 	var unique := _player.get_node_or_null("%MainCamera")
 	if unique is Camera3D:
 		return unique as Camera3D
@@ -107,6 +131,8 @@ func _find_camera_recursive(node: Node) -> Camera3D:
 
 func _ensure_camera() -> void:
 	if is_instance_valid(_camera):
+		return
+	if not is_instance_valid(_player):
 		return
 	var parent := _player.get_parent()
 	if parent == null:
@@ -135,12 +161,15 @@ func _apply_view(delta: float) -> void:
 
 	_set_visuals_visible(false)
 
-	var yaw: float = _pivot.global_rotation.y
+	var pivot: Node3D = _pivot if is_instance_valid(_pivot) else _player
+	if not is_instance_valid(pivot):
+		return
+	var yaw: float = pivot.global_rotation.y
 	var pitch: float = 0.0
-	if _holder != null:
+	if is_instance_valid(_holder):
 		pitch = clampf(_holder.rotation.x, deg_to_rad(-70.0), deg_to_rad(55.0))
 	var basis := Basis.from_euler(Vector3(pitch, yaw, 0.0))
-	var origin: Vector3 = _pivot.global_position
+	var origin: Vector3 = pivot.global_position
 	var desired: Vector3 = origin + basis * Vector3(float(view["side"]), float(view["height"]), float(view["dist"]))
 	desired = _resolve_collision(origin, desired)
 
@@ -160,6 +189,8 @@ func _apply_view(delta: float) -> void:
 
 
 func _resolve_collision(from: Vector3, to: Vector3) -> Vector3:
+	if not is_instance_valid(_player):
+		return to
 	var world := _player.get_world_3d()
 	if world == null:
 		return to
@@ -180,8 +211,9 @@ func _resolve_collision(from: Vector3, to: Vector3) -> Vector3:
 
 
 func _set_visuals_visible(visible_state: bool) -> void:
-	if _player != null:
-		_player.visible = visible_state
+	if not is_instance_valid(_player):
+		return
+	_player.visible = visible_state
 	var arms_viewport := _player.get_node_or_null("WeaponSubViewport")
 	if arms_viewport is CanvasItem:
 		(arms_viewport as CanvasItem).visible = visible_state

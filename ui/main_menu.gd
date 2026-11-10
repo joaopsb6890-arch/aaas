@@ -24,6 +24,10 @@ var _starting: bool = false
 func _ready() -> void:
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 	get_tree().paused = false
+	# Limpa o estado do jogo anterior (o nó do jogador já foi liberado junto
+	# com a fase; manter a referência antiga gera erros de instância liberada).
+	Global.player = null
+	Global.in_vehicle = false
 	modulate.a = 1.0
 	_style_ui()
 	_play_button.pressed.connect(_on_play_pressed)
