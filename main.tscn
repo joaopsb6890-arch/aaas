@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://4wonuqyiwe3i"]
 
 [ext_resource type="Script" uid="uid://bee0xk53hkjjw" path="res://common/managers/input_manager.gd" id="1_272bh"]
-[ext_resource type="Script" uid="uid://bjqxl2y4vkf3g" path="res://common/main.gd" id="1_kek77"]
+[ext_resource type="Script" path="res://common/main.gd" id="1_kek77"]
 [ext_resource type="PackedScene" uid="uid://i3v82muv47ra" path="res://world/test_level.tscn" id="2_5vw27"]
 [ext_resource type="PackedScene" uid="uid://cdbipjyx57al2" path="res://player/player.tscn" id="3_kek77"]
 [ext_resource type="PackedScene" uid="uid://cyu64gank77ya" path="res://common/hud/gameplay_hud.tscn" id="4_7mycd"]
@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" uid="uid://7hhrasxj783p" path="res://resources/vehicle/jeep.tscn" id="7_272bh"]
 [ext_resource type="PackedScene" uid="uid://b42foeuutyrg5" path="res://enemies/undead.tscn" id="7_ycdy4"]
 [ext_resource type="PackedScene" uid="uid://ngegts8mv1fv" path="res://world/interactive_items/exploding_barrel.tscn" id="8_5vw27"]
+[ext_resource type="Script" path="res://common/cinematic/intro_sequence.gd" id="9_intro"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_w755r"]
 sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
@@ -47,9 +48,6 @@ shadow_enabled = true
 
 [node name="Player" parent="." unique_id=1157596601 instance=ExtResource("3_kek77")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -65.25475, 0, -45.132164)
-
-[node name="Camera3D" type="Camera3D" parent="Player" unique_id=1796521191]
-transform = Transform3D(0.7618549, 0, 0.64774764, 0, 1, 0, -0.64774764, 0, 0.7618549, 2.032627, 1.7497445, 0.21512079)
 
 [node name="HUD" type="CanvasLayer" parent="." unique_id=586025698]
 
@@ -145,3 +143,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.066185, 0, -69.129684)
 
 [node name="Barrel14" parent="explosive_items" unique_id=1123677059 instance=ExtResource("8_5vw27")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.3568254, 0, -71.39619)
+
+[node name="Intro" type="Node" parent="." unique_id=1280712719]
+script = ExtResource("9_intro")

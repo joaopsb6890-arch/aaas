@@ -1,0 +1,143 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://ui/loader.gd" id="1_loader"]
+[ext_resource type="Shader" path="res://ui/shaders/menu_background.gdshader" id="2_bg"]
+[ext_resource type="Script" path="res://ui/spin_ball.gd" id="3_ball"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_bg"]
+shader = ExtResource("2_bg")
+shader_parameter/top_color = Color(0.045, 0.06, 0.082, 1)
+shader_parameter/bottom_color = Color(0.008, 0.011, 0.016, 1)
+shader_parameter/grid_color = Color(0.7, 0.8, 0.95, 0.045)
+shader_parameter/accent_color = Color(1, 0.623, 0.11, 1)
+shader_parameter/grid_scale = 26.0
+shader_parameter/grid_speed = 0.05
+shader_parameter/glow_strength = 0.22
+shader_parameter/vignette_strength = 1.35
+shader_parameter/grain_strength = 0.02
+
+[node name="Loader" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_loader")
+
+[node name="Background" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_bg")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.031, 0.04, 0.055, 1)
+
+[node name="TopBar" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 96.0
+offset_top = 46.0
+offset_right = -96.0
+offset_bottom = 86.0
+grow_horizontal = 2
+
+[node name="Row" type="HBoxContainer" parent="TopBar"]
+layout_mode = 2
+
+[node name="Brand" type="Label" parent="TopBar/Row"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "BLACKSITE // TRANSFERÊNCIA DE SETOR"
+
+[node name="Spacer" type="Control" parent="TopBar/Row"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="StatusTag" type="Label" parent="TopBar/Row"]
+layout_mode = 2
+text = "SETOR 07  ·  AMBIENTE SEGURO"
+horizontal_alignment = 2
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Box" type="VBoxContainer" parent="Center"]
+custom_minimum_size = Vector2(520, 0)
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="Ball" type="Control" parent="Center/Box"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 200)
+layout_mode = 2
+size_flags_horizontal = 4
+script = ExtResource("3_ball")
+
+[node name="Spacer" type="Control" parent="Center/Box"]
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 2
+
+[node name="Title" type="Label" parent="Center/Box"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "CARREGANDO"
+horizontal_alignment = 1
+
+[node name="Divider" type="ColorRect" parent="Center/Box"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(64, 2)
+layout_mode = 2
+size_flags_horizontal = 4
+color = Color(1, 0.623, 0.11, 1)
+
+[node name="Status" type="Label" parent="Center/Box"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "INICIANDO TRANSFERÊNCIA"
+horizontal_alignment = 1
+
+[node name="Progress" type="ProgressBar" parent="Center/Box"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(470, 8)
+layout_mode = 2
+size_flags_horizontal = 4
+show_percentage = false
+
+[node name="Percent" type="Label" parent="Center/Box"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "0%"
+horizontal_alignment = 1
+
+[node name="Footer" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -92.0
+offset_bottom = -52.0
+grow_horizontal = 2
+grow_vertical = 0
+text = "PRÉ-AQUECENDO O MUNDO  ·  NÃO FECHE O JOGO"
+horizontal_alignment = 1
+
+[node name="Fade" type="ColorRect" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0)

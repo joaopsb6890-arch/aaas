@@ -1,0 +1,300 @@
+[gd_scene load_steps=6 format=3 uid="uid://cyu64gank77ya"]
+
+[ext_resource type="Script" uid="uid://b64oqpqje57ty" path="res://common/hud/hud.gd" id="1_s7dpp"]
+[ext_resource type="Script" uid="uid://du2oqd4e48nc1" path="res://common/hud/damage_display.gd" id="2_hltoy"]
+[ext_resource type="Texture2D" uid="uid://brdafm3313but" path="res://resources/textures/decal_clawmark_1.png" id="2_n8asi"]
+[ext_resource type="Script" uid="uid://1t7aehdi168l" path="res://common/hud/crosshair.gd" id="4_fxrak"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_health_bg"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(0.078, 0.094, 0.114, 0.95)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_health_fill"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(1, 0.623, 0.11, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[node name="Control" type="Control" groups=["hud"]]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_s7dpp")
+
+[node name="Damage" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("2_hltoy")
+
+[node name="ClawRect" type="TextureRect" parent="Damage"]
+modulate = Color(0.75474, 0.31366125, 0.21032587, 1)
+visible = false
+offset_left = 720.0
+offset_top = 290.0
+offset_right = 960.0
+offset_bottom = 790.0
+mouse_filter = 2
+texture = ExtResource("2_n8asi")
+
+[node name="DamageOverlay" type="ColorRect" parent="Damage"]
+visible = false
+modulate = Color(1, 1, 1, 0.5)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.568627, 0.101961, 0.101961, 1)
+
+[node name="Crosshair" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("4_fxrak")
+
+[node name="CrosshairTop" type="ColorRect" parent="Crosshair"]
+layout_mode = 0
+offset_left = 958.0
+offset_top = 515.0
+offset_right = 961.0
+offset_bottom = 525.0
+mouse_filter = 2
+color = Color(1, 0.86, 0.63, 0.95)
+
+[node name="CrosshairBottom" type="ColorRect" parent="Crosshair"]
+layout_mode = 0
+offset_left = 958.0
+offset_top = 555.0
+offset_right = 961.0
+offset_bottom = 565.0
+mouse_filter = 2
+color = Color(1, 0.86, 0.63, 0.95)
+
+[node name="CrosshairLeft" type="ColorRect" parent="Crosshair"]
+layout_mode = 0
+offset_left = 935.0
+offset_top = 538.0
+offset_right = 945.0
+offset_bottom = 541.0
+mouse_filter = 2
+color = Color(1, 0.86, 0.63, 0.95)
+
+[node name="CrosshairRight" type="ColorRect" parent="Crosshair"]
+layout_mode = 0
+offset_left = 975.0
+offset_top = 538.0
+offset_right = 985.0
+offset_bottom = 541.0
+mouse_filter = 2
+color = Color(1, 0.86, 0.63, 0.95)
+
+[node name="CrosshairCenter" type="ColorRect" parent="Crosshair"]
+layout_mode = 0
+offset_left = 959.0
+offset_top = 539.0
+offset_right = 961.0
+offset_bottom = 541.0
+mouse_filter = 2
+color = Color(1, 0.86, 0.63, 1)
+
+[node name="HealthPanel" type="PanelContainer" parent="."]
+layout_mode = 1
+anchor_top = 0.0
+anchor_bottom = 0.0
+offset_left = 46.0
+offset_top = 46.0
+offset_right = 396.0
+offset_bottom = 152.0
+
+[node name="Margin" type="MarginContainer" parent="HealthPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 12
+
+[node name="Box" type="VBoxContainer" parent="HealthPanel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="HealthKicker" type="Label" parent="HealthPanel/Margin/Box"]
+layout_mode = 2
+text = "VITALIDADE"
+
+[node name="HealthBar" type="ProgressBar" parent="HealthPanel/Margin/Box"]
+custom_minimum_size = Vector2(314, 14)
+layout_mode = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_health_bg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_health_fill")
+value = 100.0
+show_percentage = false
+
+[node name="HealthValue" type="Label" parent="HealthPanel/Margin/Box"]
+layout_mode = 2
+text = "100 / 100"
+
+[node name="KillsPanel" type="PanelContainer" parent="."]
+layout_mode = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -272.0
+offset_top = 46.0
+offset_right = -46.0
+offset_bottom = 152.0
+grow_horizontal = 0
+
+[node name="Margin" type="MarginContainer" parent="KillsPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 12
+
+[node name="Box" type="VBoxContainer" parent="KillsPanel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 2
+alignment = 1
+
+[node name="KillsKicker" type="Label" parent="KillsPanel/Margin/Box"]
+layout_mode = 2
+text = "AMEAÇAS NEUTRALIZADAS"
+horizontal_alignment = 2
+
+[node name="EnemiesLabel" type="Label" parent="KillsPanel/Margin/Box"]
+layout_mode = 2
+text = "00"
+horizontal_alignment = 2
+
+[node name="AmmoPanel" type="PanelContainer" parent="."]
+layout_mode = 1
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -348.0
+offset_top = -176.0
+offset_right = -46.0
+offset_bottom = -64.0
+grow_horizontal = 0
+grow_vertical = 0
+
+[node name="Margin" type="MarginContainer" parent="AmmoPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 12
+
+[node name="Box" type="VBoxContainer" parent="AmmoPanel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 2
+alignment = 2
+
+[node name="WeaponName" type="Label" parent="AmmoPanel/Margin/Box"]
+layout_mode = 2
+text = "PISTOL"
+horizontal_alignment = 2
+
+[node name="BulletsLabel" type="Label" parent="AmmoPanel/Margin/Box"]
+layout_mode = 2
+text = "12 / 60"
+horizontal_alignment = 2
+
+[node name="Hint" type="Label" parent="."]
+layout_mode = 1
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = -420.0
+offset_top = -196.0
+offset_right = 420.0
+offset_bottom = -150.0
+grow_horizontal = 2
+grow_vertical = 0
+text = "MISSÃO: LIMPAR O SETOR"
+horizontal_alignment = 1
+
+[node name="ControlsBar" type="PanelContainer" parent="."]
+layout_mode = 1
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = -560.0
+offset_top = -122.0
+offset_right = 560.0
+offset_bottom = -48.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="Margin" type="MarginContainer" parent="ControlsBar"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 10
+
+[node name="Row" type="HBoxContainer" parent="ControlsBar/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 22
+alignment = 1
+
+[node name="Chip1" type="Label" parent="ControlsBar/Margin/Row"]
+layout_mode = 2
+text = "WASD  MOVER"
+
+[node name="Chip2" type="Label" parent="ControlsBar/Margin/Row"]
+layout_mode = 2
+text = "SHIFT  CORRER"
+
+[node name="Chip3" type="Label" parent="ControlsBar/Margin/Row"]
+layout_mode = 2
+text = "ESPAÇO  PULAR"
+
+[node name="Chip4" type="Label" parent="ControlsBar/Margin/Row"]
+layout_mode = 2
+text = "CTRL  AGACHAR"
+
+[node name="Chip5" type="Label" parent="ControlsBar/Margin/Row"]
+layout_mode = 2
+text = "R  RECARREGAR"
+
+[node name="Chip6" type="Label" parent="ControlsBar/Margin/Row"]
+layout_mode = 2
+text = "V  CÂMERA"
+
+[node name="Chip7" type="Label" parent="ControlsBar/Margin/Row"]
+layout_mode = 2
+text = "F  USAR"
+
+[node name="Chip8" type="Label" parent="ControlsBar/Margin/Row"]
+layout_mode = 2
+text = "ESC  PAUSAR"

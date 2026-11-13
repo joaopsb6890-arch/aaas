@@ -23,12 +23,13 @@ config/icon="res://icon.svg"
 
 Global="*res://common/autoloads/global.gd"
 Bullets="*uid://cfvax2ybt3j06"
-MobileControls="*res://common/mobile/mobile_controls.gd"
 PauseMenu="*res://ui/pause_menu.tscn"
 CameraDirector="*res://common/camera/camera_director.gd"
 
 [display]
 
+window/size/viewport_width=1600
+window/size/viewport_height=900
 window/size/initial_position_type=0
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"

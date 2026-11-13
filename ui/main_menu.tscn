@@ -1,10 +1,20 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://ui/main_menu.gd" id="1_menu"]
 [ext_resource type="Shader" path="res://ui/shaders/menu_background.gdshader" id="2_bg"]
+[ext_resource type="Script" path="res://ui/menu_reticle.gd" id="3_reticle"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_bg"]
 shader = ExtResource("2_bg")
+shader_parameter/top_color = Color(0.058, 0.078, 0.105, 1)
+shader_parameter/bottom_color = Color(0.011, 0.015, 0.022, 1)
+shader_parameter/grid_color = Color(0.7, 0.8, 0.95, 0.05)
+shader_parameter/accent_color = Color(1, 0.623, 0.11, 1)
+shader_parameter/grid_scale = 24.0
+shader_parameter/grid_speed = 0.03
+shader_parameter/glow_strength = 0.26
+shader_parameter/vignette_strength = 1.3
+shader_parameter/grain_strength = 0.022
 
 [node name="MainMenu" type="Control"]
 layout_mode = 3
@@ -25,6 +35,70 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.043, 0.055, 0.078, 1)
 
+[node name="Reticle" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 0.66
+anchor_bottom = 0.96
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("3_reticle")
+
+[node name="TopBar" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 96.0
+offset_top = 46.0
+offset_right = -96.0
+offset_bottom = 96.0
+grow_horizontal = 2
+
+[node name="Row" type="HBoxContainer" parent="TopBar"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="Mark" type="ColorRect" parent="TopBar/Row"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 2
+color = Color(1, 0.623, 0.11, 1)
+
+[node name="Brand" type="VBoxContainer" parent="TopBar/Row"]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="BrandName" type="Label" parent="TopBar/Row/Brand"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "BLACKSITE // TREINAMENTO TÁTICO"
+
+[node name="BrandSub" type="Label" parent="TopBar/Row/Brand"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "SIMULADOR DE COMBATE  ·  SETOR 07"
+
+[node name="Spacer" type="Control" parent="TopBar/Row"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Status" type="HBoxContainer" parent="TopBar/Row"]
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 2
+
+[node name="Dot" type="ColorRect" parent="TopBar/Row/Status"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(8, 8)
+layout_mode = 2
+size_flags_vertical = 4
+color = Color(0.36, 0.86, 0.51, 1)
+
+[node name="StatusLabel" type="Label" parent="TopBar/Row/Status"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "SISTEMA ONLINE"
+
 [node name="Content" type="MarginContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
@@ -33,39 +107,55 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/margin_left = 96
-theme_override_constants/margin_top = 72
+theme_override_constants/margin_top = 128
 theme_override_constants/margin_right = 96
-theme_override_constants/margin_bottom = 64
+theme_override_constants/margin_bottom = 56
 
 [node name="Row" type="HBoxContainer" parent="Content"]
 layout_mode = 2
-theme_override_constants/separation = 64
+theme_override_constants/separation = 72
 
 [node name="Left" type="VBoxContainer" parent="Content/Row"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 4
+theme_override_constants/separation = 0
 
 [node name="Kicker" type="Label" parent="Content/Row/Left"]
+unique_name_in_owner = true
 layout_mode = 2
-text = "// TREINAMENTO TATICO"
+text = "// OPERAÇÃO  NOITE LONGA"
 
 [node name="Title" type="Label" parent="Content/Row/Left"]
+unique_name_in_owner = true
 layout_mode = 2
 text = "FPS DEMO"
 
+[node name="TitleTag" type="Label" parent="Content/Row/Left"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "SOBREVIVA AO SETOR"
+
 [node name="Divider" type="ColorRect" parent="Content/Row/Left"]
-custom_minimum_size = Vector2(140, 3)
+unique_name_in_owner = true
+custom_minimum_size = Vector2(168, 3)
 layout_mode = 2
 size_flags_horizontal = 0
 color = Color(1, 0.623, 0.11, 1)
 
 [node name="Subtitle" type="Label" parent="Content/Row/Left"]
+unique_name_in_owner = true
 layout_mode = 2
 text = "SOBREVIVA. ADAPTE-SE. AVANCE."
 
-[node name="ButtonsSpacer" type="Control" parent="Content/Row/Left"]
-custom_minimum_size = Vector2(0, 44)
+[node name="Description" type="Label" parent="Content/Row/Left"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(520, 0)
+layout_mode = 2
+text = "Você acorda no meio de uma zona morta. Armas, munição e um setor inteiro contra você. Entre, limpe o perímetro e descubra até onde aguenta."
+autowrap_mode = 3
+
+[node name="ButtonSpacer" type="Control" parent="Content/Row/Left"]
+custom_minimum_size = Vector2(0, 34)
 layout_mode = 2
 
 [node name="Buttons" type="VBoxContainer" parent="Content/Row/Left"]
@@ -73,14 +163,18 @@ layout_mode = 2
 theme_override_constants/separation = 12
 
 [node name="PlayButton" type="Button" parent="Content/Row/Left/Buttons"]
-custom_minimum_size = Vector2(0, 54)
+unique_name_in_owner = true
+custom_minimum_size = Vector2(360, 58)
 layout_mode = 2
+size_flags_horizontal = 0
 focus_neighbor_bottom = NodePath("../QuitButton")
 text = "JOGAR"
 
 [node name="QuitButton" type="Button" parent="Content/Row/Left/Buttons"]
-custom_minimum_size = Vector2(0, 54)
+unique_name_in_owner = true
+custom_minimum_size = Vector2(360, 54)
 layout_mode = 2
+size_flags_horizontal = 0
 focus_neighbor_top = NodePath("../PlayButton")
 text = "SAIR"
 
@@ -88,62 +182,149 @@ text = "SAIR"
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="Version" type="Label" parent="Content/Row/Left"]
+[node name="Footer" type="HBoxContainer" parent="Content/Row/Left"]
 layout_mode = 2
-text = "v0.2  -  GODOT 4"
+theme_override_constants/separation = 18
+
+[node name="Version" type="Label" parent="Content/Row/Left/Footer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "v0.3  ·  GODOT 4"
+
+[node name="FooterSep" type="Label" parent="Content/Row/Left/Footer"]
+layout_mode = 2
+text = "·"
+
+[node name="FooterNote" type="Label" parent="Content/Row/Left/Footer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "MELHOR EXPERIÊNCIA COM MOUSE E TECLADO"
 
 [node name="Right" type="VBoxContainer" parent="Content/Row"]
-custom_minimum_size = Vector2(340, 0)
+custom_minimum_size = Vector2(392, 0)
 layout_mode = 2
 size_flags_horizontal = 8
 size_flags_vertical = 8
-theme_override_constants/separation = 10
+theme_override_constants/separation = 16
 alignment = 2
 
-[node name="ControlsTitle" type="Label" parent="Content/Row/Right"]
-layout_mode = 2
-text = "CONTROLES"
-
-[node name="ControlsPanel" type="PanelContainer" parent="Content/Row/Right"]
+[node name="MissionCard" type="PanelContainer" parent="Content/Row/Right"]
+unique_name_in_owner = true
 layout_mode = 2
 
-[node name="ControlsMargin" type="MarginContainer" parent="Content/Row/Right/ControlsPanel"]
+[node name="Margin" type="MarginContainer" parent="Content/Row/Right/MissionCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 26
+theme_override_constants/margin_top = 22
+theme_override_constants/margin_right = 26
+theme_override_constants/margin_bottom = 22
+
+[node name="Box" type="VBoxContainer" parent="Content/Row/Right/MissionCard/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 9
+
+[node name="MissionKicker" type="Label" parent="Content/Row/Right/MissionCard/Margin/Box"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "// MISSÃO ATUAL"
+
+[node name="MissionTitle" type="Label" parent="Content/Row/Right/MissionCard/Margin/Box"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "LIMPAR O SETOR"
+
+[node name="Rule" type="ColorRect" parent="Content/Row/Right/MissionCard/Margin/Box"]
+custom_minimum_size = Vector2(46, 2)
+layout_mode = 2
+size_flags_horizontal = 0
+color = Color(1, 0.623, 0.11, 0.8)
+
+[node name="MissionText" type="Label" parent="Content/Row/Right/MissionCard/Margin/Box"]
+layout_mode = 2
+text = "Elimine as ameaças, recupere munição e sobreviva à horda. O setor não vai se limpar sozinho."
+autowrap_mode = 3
+
+[node name="Stats" type="VBoxContainer" parent="Content/Row/Right/MissionCard/Margin/Box"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Stat1" type="HBoxContainer" parent="Content/Row/Right/MissionCard/Margin/Box/Stats"]
 layout_mode = 2
 
-[node name="ControlsList" type="VBoxContainer" parent="Content/Row/Right/ControlsPanel/ControlsMargin"]
+[node name="Key1" type="Label" parent="Content/Row/Right/MissionCard/Margin/Box/Stats/Stat1"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "AMEAÇA"
+
+[node name="Value1" type="Label" parent="Content/Row/Right/MissionCard/Margin/Box/Stats/Stat1"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "ALTA"
+horizontal_alignment = 2
+
+[node name="Stat2" type="HBoxContainer" parent="Content/Row/Right/MissionCard/Margin/Box/Stats"]
+layout_mode = 2
+
+[node name="Key2" type="Label" parent="Content/Row/Right/MissionCard/Margin/Box/Stats/Stat2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "ARSENAL"
+
+[node name="Value2" type="Label" parent="Content/Row/Right/MissionCard/Margin/Box/Stats/Stat2"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "5 ARMAS"
+horizontal_alignment = 2
+
+[node name="ControlsCard" type="PanelContainer" parent="Content/Row/Right"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="Content/Row/Right/ControlsCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 26
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 26
+theme_override_constants/margin_bottom = 20
+
+[node name="Box" type="VBoxContainer" parent="Content/Row/Right/ControlsCard/Margin"]
 layout_mode = 2
 theme_override_constants/separation = 7
 
-[node name="Item1" type="Label" parent="Content/Row/Right/ControlsPanel/ControlsMargin/ControlsList"]
+[node name="ControlsKicker" type="Label" parent="Content/Row/Right/ControlsCard/Margin/Box"]
+unique_name_in_owner = true
 layout_mode = 2
-text = "W A S D   MOVER"
+text = "// CONTROLES"
 
-[node name="Item2" type="Label" parent="Content/Row/Right/ControlsPanel/ControlsMargin/ControlsList"]
+[node name="Item1" type="Label" parent="Content/Row/Right/ControlsCard/Margin/Box"]
 layout_mode = 2
-text = "MOUSE   OLHAR"
+text = "W A S D     MOVER"
 
-[node name="Item3" type="Label" parent="Content/Row/Right/ControlsPanel/ControlsMargin/ControlsList"]
+[node name="Item2" type="Label" parent="Content/Row/Right/ControlsCard/Margin/Box"]
 layout_mode = 2
-text = "BOTAO ESQUERDO / DIREITO   ATIRAR / MIRAR"
+text = "MOUSE     OLHAR"
 
-[node name="Item4" type="Label" parent="Content/Row/Right/ControlsPanel/ControlsMargin/ControlsList"]
+[node name="Item3" type="Label" parent="Content/Row/Right/ControlsCard/Margin/Box"]
 layout_mode = 2
-text = "SHIFT / ESPACO   CORRER / PULAR"
+text = "SHIFT / ESPAÇO     CORRER / PULAR"
 
-[node name="Item5" type="Label" parent="Content/Row/Right/ControlsPanel/ControlsMargin/ControlsList"]
+[node name="Item4" type="Label" parent="Content/Row/Right/ControlsCard/Margin/Box"]
 layout_mode = 2
-text = "F   ENTRAR / SAIR DO VEICULO"
+text = "CTRL     AGACHAR"
 
-[node name="Item6" type="Label" parent="Content/Row/Right/ControlsPanel/ControlsMargin/ControlsList"]
+[node name="Item5" type="Label" parent="Content/Row/Right/ControlsCard/Margin/Box"]
 layout_mode = 2
-text = "V   TROCAR DE CAMERA (4 VISTAS)"
+text = "V     TROCAR CÂMERA (4 VISTAS)"
 
-[node name="Item7" type="Label" parent="Content/Row/Right/ControlsPanel/ControlsMargin/ControlsList"]
+[node name="Item6" type="Label" parent="Content/Row/Right/ControlsCard/Margin/Box"]
 layout_mode = 2
-text = "ESC   PAUSAR"
+text = "F / ESC     USAR / PAUSAR"
 
 [node name="Hint" type="Label" parent="Content/Row/Right"]
+unique_name_in_owner = true
 layout_mode = 2
-text = "Ao volante: V alterna entre as 4 cameras do GTA."
+text = "ENTRAR NO SETOR VAI CARREGAR O MUNDO"
 horizontal_alignment = 2
 autowrap_mode = 3

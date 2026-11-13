@@ -30,6 +30,8 @@ func _ready() -> void:
 
 
 func _input(event: InputEvent) -> void:
+	if Global.cinematic_mode:
+		return
 	if not event.is_action_pressed("exit"):
 		return
 	if _is_main_menu():
@@ -102,7 +104,8 @@ func _is_main_menu() -> bool:
 	var scene := get_tree().current_scene
 	if scene == null or not is_instance_valid(scene):
 		return false
-	return scene.scene_file_path == MAIN_MENU_SCENE
+	# O carregamento também não deve abrir o menu de pausa.
+	return scene.scene_file_path in [MAIN_MENU_SCENE, "res://ui/loader.tscn"]
 
 
 func _on_restart_pressed() -> void:
