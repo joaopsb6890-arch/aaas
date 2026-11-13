@@ -1,106 +1,178 @@
+class_name UIKit
 extends RefCounted
-## Shared look & feel for the menus (fonts, colors, style boxes, hover animation).
-## Usage: const UIKit = preload("res://ui/ui_kit.gd")
+## Estilo visual partilhado por todos os menus (tema, botões, sons).
 
 const FONT_PATH := "res://resources/fonts/ShareTech-Regular.ttf"
+const ACCENT := Color("ff7a2f")
+const ACCENT_HI := Color("ffa062")
+const CYAN := Color("52d0ff")
+const TEXT := Color("eef2f9")
+const DIM := Color("8c98ad")
+const DANGER := Color("ff4d5a")
+const PANEL := Color(0.067, 0.082, 0.118, 0.95)
 
-const ACCENT := Color("ff9f1c")
-const ACCENT_DARK := Color("b96f00")
-const TEXT := Color("e9eef5")
-const MUTED := Color("93a3b8")
-const SURFACE := Color("121a24")
-const SURFACE_HOVER := Color("1e2a38")
-const PANEL_BG := Color(0.043, 0.059, 0.086, 0.92)
-const DANGER := Color("e5484d")
-
-
-static func load_font() -> Font:
-	var res := load(FONT_PATH)
-	if res is Font:
-		return res
-	return ThemeDB.fallback_font
+static var _theme: Theme
+static var _font: Font
+static var _snd: Dictionary = {}
 
 
-static func apply_font(node: Control, size: int, color: Color, outline: int = 0) -> void:
-	var font := load_font()
-	node.add_theme_font_override("font", font)
-	node.add_theme_font_size_override("font_size", size)
-	if node is Label:
-		node.add_theme_color_override("font_color", color)
-	elif node is Button:
-		node.add_theme_color_override("font_color", color)
-	if outline > 0:
-		node.add_theme_constant_override("outline_size", outline)
-		node.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.6))
+static func font() -> Font:
+	if _font == null:
+		_font = load(FONT_PATH) if ResourceLoader.exists(FONT_PATH) else ThemeDB.fallback_font
+	return _font
 
 
-static func box(bg: Color, border_color: Color = Color.TRANSPARENT, border_left: int = 0, content_margin: float = 18.0, radius: int = 4) -> StyleBoxFlat:
-	var sb := StyleBoxFlat.new()
-	sb.bg_color = bg
-	sb.set_corner_radius_all(radius)
-	sb.content_margin_left = content_margin + float(border_left)
-	sb.content_margin_right = content_margin
-	sb.content_margin_top = 12.0
-	sb.content_margin_bottom = 12.0
-	if border_left > 0:
-		sb.border_width_left = border_left
-		sb.border_color = border_color
-	return sb
+static func box(bg: Color, radius: int = 12, border: Color = Color(0, 0, 0, 0), bw: int = 0) -> StyleBoxFlat:
+	var s := StyleBoxFlat.new()
+	s.bg_color = bg
+	s.set_corner_radius_all(radius)
+	if bw > 0:
+		s.set_border_width_all(bw)
+		s.border_color = border
+	return s
 
 
-static func panel(bg: Color = PANEL_BG, radius: int = 6) -> StyleBoxFlat:
-	var sb := StyleBoxFlat.new()
-	sb.bg_color = bg
-	sb.set_corner_radius_all(radius)
-	sb.border_width_left = 1
-	sb.border_width_top = 1
-	sb.border_width_right = 1
-	sb.border_width_bottom = 1
-	sb.border_color = Color(1.0, 1.0, 1.0, 0.08)
-	sb.shadow_color = Color(0.0, 0.0, 0.0, 0.45)
-	sb.shadow_size = 18
-	sb.content_margin_left = 30.0
-	sb.content_margin_right = 30.0
-	sb.content_margin_top = 26.0
-	sb.content_margin_bottom = 26.0
-	return sb
+static func _btn(bg: Color, border: Color, bar: bool) -> StyleBoxFlat:
+	var s := box(bg, 12, border, 1)
+	if bar:
+		s.border_width_left = 6
+	s.content_margin_left = 30
+	s.content_margin_right = 30
+	s.content_margin_top = 15
+	s.content_margin_bottom = 15
+	return s
 
 
-static func style_button(button: Button, accent: bool = false) -> void:
-	var tint := ACCENT if accent else Color("9fb2c8")
-	button.add_theme_stylebox_override("normal", box(SURFACE, tint, 3))
-	button.add_theme_stylebox_override("hover", box(SURFACE_HOVER, tint, 6))
-	button.add_theme_stylebox_override("pressed", box(tint.darkened(0.55), tint, 6))
-	button.add_theme_stylebox_override("focus", box(Color(0.0, 0.0, 0.0, 0.0), tint, 6))
-	button.add_theme_stylebox_override("disabled", box(Color(0.07, 0.08, 0.1), Color(0.3, 0.3, 0.3), 3))
-	apply_font(button, 24, TEXT)
-	button.add_theme_color_override("font_hover_color", Color.WHITE)
-	button.add_theme_color_override("font_focus_color", Color.WHITE)
-	button.add_theme_color_override("font_pressed_color", Color(0.05, 0.05, 0.06))
-	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
-	button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+static func circle_tex(size: int, col: Color) -> ImageTexture:
+	var img := Image.create(size, size, false, Image.FORMAT_RGBA8)
+	var c := (size - 1) * 0.5
+	for y in size:
+		for x in size:
+			var d := Vector2(x - c, y - c).length()
+			var a := clampf(c - d, 0.0, 1.0)
+			img.set_pixel(x, y, Color(col.r, col.g, col.b, a))
+	return ImageTexture.create_from_image(img)
 
 
-static func animate_hover(button: Button, hovered: bool) -> void:
-	button.pivot_offset = button.size * 0.5
-	var tw := button.create_tween()
-	tw.tween_property(button, "scale", Vector2.ONE * (1.03 if hovered else 1.0), 0.14).set_trans(Tween.TRANS_SINE)
+static func theme() -> Theme:
+	if _theme:
+		return _theme
+	var t := Theme.new()
+	t.default_font = font()
+	t.default_font_size = 26
+	t.set_color("font_color", "Label", TEXT)
+	# Botões
+	for type_name in ["Button", "PrimaryButton", "DangerButton"]:
+		if type_name != "Button":
+			t.set_type_variation(type_name, "Button")
+		var base := Color(1, 1, 1, 0.06)
+		var line := Color(1, 1, 1, 0.14)
+		var hov := Color(ACCENT.r, ACCENT.g, ACCENT.b, 0.20)
+		var pre := Color(ACCENT.r, ACCENT.g, ACCENT.b, 0.40)
+		var txt := TEXT
+		var edge := ACCENT
+		if type_name == "PrimaryButton":
+			base = ACCENT
+			line = ACCENT_HI
+			hov = ACCENT_HI
+			pre = Color("d9611b")
+			txt = Color("1a0e06")
+			edge = Color.WHITE
+		elif type_name == "DangerButton":
+			edge = DANGER
+			hov = Color(DANGER.r, DANGER.g, DANGER.b, 0.22)
+			pre = Color(DANGER.r, DANGER.g, DANGER.b, 0.45)
+		t.set_stylebox("normal", type_name, _btn(base, line, true))
+		t.set_stylebox("hover", type_name, _btn(hov, edge, true))
+		t.set_stylebox("pressed", type_name, _btn(pre, edge, true))
+		t.set_stylebox("focus", type_name, _btn(hov, edge, true))
+		t.set_stylebox("disabled", type_name, _btn(Color(1, 1, 1, 0.03), Color(1, 1, 1, 0.06), true))
+		for c in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color"]:
+			t.set_color(c, type_name, txt)
+		t.set_color("font_disabled_color", type_name, DIM)
+		t.set_font_size("font_size", type_name, 28)
+	# Slider
+	var track := box(Color(1, 1, 1, 0.16), 5)
+	track.content_margin_top = 5
+	track.content_margin_bottom = 5
+	var fill := box(ACCENT, 5)
+	fill.content_margin_top = 5
+	fill.content_margin_bottom = 5
+	t.set_stylebox("slider", "HSlider", track)
+	t.set_stylebox("grabber_area", "HSlider", fill)
+	t.set_stylebox("grabber_area_highlight", "HSlider", fill)
+	t.set_icon("grabber", "HSlider", circle_tex(40, Color.WHITE))
+	t.set_icon("grabber_highlight", "HSlider", circle_tex(40, ACCENT_HI))
+	t.set_icon("grabber_disabled", "HSlider", circle_tex(40, DIM))
+	# Painéis
+	t.set_stylebox("panel", "PanelContainer", box(PANEL, 22, Color(1, 1, 1, 0.12), 2))
+	_theme = t
+	return t
 
 
-static func wire_button(button: Button) -> void:
-	button.mouse_entered.connect(func() -> void: animate_hover(button, true))
-	button.mouse_exited.connect(func() -> void: animate_hover(button, false))
-	button.focus_entered.connect(func() -> void: animate_hover(button, true))
-	button.focus_exited.connect(func() -> void: animate_hover(button, false))
+static func label(text: String, size: int = 26, color: Color = TEXT) -> Label:
+	var l := Label.new()
+	l.text = text
+	l.add_theme_font_size_override("font_size", size)
+	l.add_theme_color_override("font_color", color)
+	return l
 
 
-## Fade + pop used for the intro choreography.
-static func pop(node: Control, delay: float) -> void:
-	node.modulate.a = 0.0
-	node.scale = Vector2(0.95, 0.95)
-	if node.size != Vector2.ZERO:
-		node.pivot_offset = node.size * 0.5
-	var tw := node.create_tween()
-	tw.set_parallel(true)
-	tw.tween_property(node, "modulate:a", 1.0, 0.5).set_delay(delay)
-	tw.tween_property(node, "scale", Vector2.ONE, 0.55).set_delay(delay).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+static func button(text: String, kind: String = "") -> Button:
+	var b := Button.new()
+	b.text = text
+	b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	b.focus_mode = Control.FOCUS_ALL
+	if kind != "":
+		b.theme_type_variation = kind
+	b.resized.connect(func(): b.pivot_offset = Vector2(0.0, b.size.y * 0.5))
+	b.mouse_entered.connect(func(): _scale(b, 1.035))
+	b.mouse_exited.connect(func(): _scale(b, 1.0))
+	b.focus_entered.connect(func(): _scale(b, 1.035))
+	b.focus_exited.connect(func(): _scale(b, 1.0))
+	b.button_down.connect(func(): _scale(b, 0.97))
+	b.button_up.connect(func(): _scale(b, 1.035 if b.is_hovered() else 1.0))
+	b.pressed.connect(func(): play(b, "click"))
+	b.mouse_entered.connect(func(): play(b, "hover"))
+	return b
+
+
+static func _scale(b: Control, s: float) -> void:
+	if not b.is_inside_tree():
+		return
+	var tw := b.create_tween()
+	tw.tween_property(b, "scale", Vector2(s, s), 0.10).set_trans(Tween.TRANS_SINE)
+
+
+static func _tone(f0: float, f1: float, dur: float, vol: float) -> AudioStreamWAV:
+	var rate := 22050
+	var n := int(rate * dur)
+	var data := PackedByteArray()
+	data.resize(n * 2)
+	var ph := 0.0
+	for i in n:
+		var k := float(i) / float(n)
+		ph += TAU * lerpf(f0, f1, k) / rate
+		var v := int(clampf(sin(ph) * (1.0 - k) * (1.0 - k) * vol, -1.0, 1.0) * 32767.0)
+		data.encode_s16(i * 2, v)
+	var w := AudioStreamWAV.new()
+	w.format = AudioStreamWAV.FORMAT_16_BITS
+	w.mix_rate = rate
+	w.stereo = false
+	w.data = data
+	return w
+
+
+static func play(owner: Node, kind: String) -> void:
+	if not owner.is_inside_tree():
+		return
+	if not _snd.has(kind):
+		_snd[kind] = _tone(660.0, 900.0, 0.08, 0.35) if kind == "click" else _tone(1300.0, 1300.0, 0.025, 0.10)
+	var p := owner.get_node_or_null("UISfx") as AudioStreamPlayer
+	if p == null:
+		p = AudioStreamPlayer.new()
+		p.name = "UISfx"
+		p.process_mode = Node.PROCESS_MODE_ALWAYS
+		owner.add_child(p)
+	p.stream = _snd[kind]
+	p.play()
