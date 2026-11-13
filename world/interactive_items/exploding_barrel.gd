@@ -11,6 +11,7 @@ func get_damage(_damage,_direction) -> void:
 
 
 func destroy() -> void:
+	Global.noise_made.emit(global_position, 60.0)
 	$barrel.visible = false
 	$CollisionShape3D.disabled = true
 	explosion_vfx.activate()
